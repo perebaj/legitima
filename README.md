@@ -1,6 +1,6 @@
 
-![Logo](/assets/dark.png#gh-dark-mode-only)
-![Logo](/assets/light.png#gh-light-mode-only)
+![Logo](/assets/blackbackground.png#gh-dark-mode-only)
+![Logo](/assets/whitebackgorund.png#gh-light-mode-only)
 
 ![image](assets/legitima.png)
 
