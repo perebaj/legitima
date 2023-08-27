@@ -1,12 +1,13 @@
+# TOOLS VERSIONS
+export GO_VERSION=1.21.0
+export GOLANGCI_LINT_VERSION=v1.54.0
+
 SHELL = /bin/bash
 
-# TOOLS VERSIONS
-GO_VERSION=1.21.0
-GOLANGCI_LINT_VERSION=v1.54.0
 
 # configuration/aliases
 version=$(shell git rev-parse --short HEAD)
-base_image=registry.heroku.com/armoco/web
+base_image=registry.heroku.com/legitima/web
 image=$(base_image):latest
 devimage=legitima-dev
 # To avoid downloading deps everytime it runs on containers
@@ -82,7 +83,6 @@ image/run: image
 image/publish: image
 	docker push $(image)
 
-
 ## Create the dev container image
 .PHONY: dev/image
 dev/image:
@@ -102,6 +102,33 @@ dev: dev/image
 ## run a make target inside the dev container.
 dev/%: dev/image
 	$(devrun) make ${*}
+
+## Create a new migration, use make migration/new name=<migration_name>
+.PHONY: migration/new
+migration/new:
+	@echo "Creating new migration..."
+	go run github.com/golang-migrate/migrate/v4/cmd/migrate \
+		create \
+		-dir ./mysql/migrations \
+		-ext sql \
+		-seq \
+		$(name)
+
+## Start containers, additionaly you can provide rebuild=true to force rebuild
+.PHONY: dev/start
+dev/start:
+	@echo "Starting development server..."
+	@if [ "$(rebuild)" = "true" ]; then \
+		docker-compose up -d --build; \
+	else \
+		docker-compose up -d; \
+	fi
+
+## Stop containers
+.PHONY: dev/stop
+dev/stop:
+	@echo "Stopping development server..."
+	@docker-compose down
 
 ## Display help for all targets
 .PHONY: help

@@ -1,4 +1,4 @@
-// Package api implements the HTTP API provided by the ingester service.
+// Package api contains the API useful functions and types.
 package api
 
 import (
