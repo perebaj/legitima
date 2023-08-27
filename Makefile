@@ -6,8 +6,8 @@ GOLANGCI_LINT_VERSION=v1.54.0
 
 # configuration/aliases
 version=$(shell git rev-parse --short HEAD)
-base_image=us-central1-docker.pkg.dev/birdie-org/birdie/jj/legitima
-image=$(base_image):$(version)
+base_image=registry.heroku.com/armoco/web
+image=$(base_image):latest
 devimage=legitima-dev
 # To avoid downloading deps everytime it runs on containers
 gopkg=$(devimage)-gopkg
@@ -62,10 +62,6 @@ test/coverage:
 test/coverage/show: test/coverage
 	go tool cover -html=$(covreport)
 
-## Configure a proxy to the service running on GKE (environment depends on which cluster is configured on kubectl).
-.PHONY: port-forward
-port-forward:
-	kubectl port-forward -n enrichment service/legitima 8080:80
 
 ## Build the service image
 .PHONY: image
@@ -86,19 +82,6 @@ image/run: image
 image/publish: image
 	docker push $(image)
 
-## Releases to production
-.PHONY: release
-release: release_version=release-$(shell date '+%Y-%m-%d')-$(version)
-release: release_image=$(base_image):$(release_version)
-release:
-	@echo "releasing from image: $(image)"
-	@echo "release image:        $(release_image)"
-	@echo "git tag:              $(release_version)"
-	docker pull $(image)
-	docker image tag $(image) $(release_image)
-	docker push $(release_image)
-	git tag -a $(release_version) -m "release to production: $(release_image)"
-	git push origin $(release_version)
 
 ## Create the dev container image
 .PHONY: dev/image
