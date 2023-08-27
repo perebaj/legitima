@@ -20,6 +20,7 @@ func SetupAuth(mux *http.ServeMux, googleOAuthConfig *oauth2.Config) {
 	mux.Handle(callbackURL, CallbackHandler(googleOAuthConfig))
 }
 
+// LoginHandler handles the login request.
 func LoginHandler(googleOAuthConfig *oauth2.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
@@ -31,6 +32,7 @@ func LoginHandler(googleOAuthConfig *oauth2.Config) http.Handler {
 	})
 }
 
+// CallbackHandler handles the callback request.
 func CallbackHandler(googleOAuthConfig *oauth2.Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
