@@ -61,14 +61,9 @@ func main() {
 		ConnMaxIdleTime: 5 * time.Minute,
 	}
 
-	db, err := mysql.OpenDB(dbConfig)
+	_, err = mysql.OpenDB(dbConfig)
 	if err != nil {
 		slog.Fatal("failed to open db", "error", err.Error())
-	}
-
-	err = mysql.Migrate(db)
-	if err != nil {
-		slog.Fatal("failed to migrate db", "error", err.Error())
 	}
 
 	mux := http.NewServeMux()
