@@ -15,10 +15,15 @@ const (
 	callbackURL = "/callback"
 )
 
+// Storage interface take care of functionalities needed by the auth endpoints.
+type Storage interface {
+	SaveUser(gUsr GoogleUser) error
+}
+
 // SetupAuth sets up the authentication endpoints.
-func SetupAuth(mux *http.ServeMux, googleOAuthConfig *oauth2.Config) {
+func SetupAuth(mux *http.ServeMux, googleOAuthConfig *oauth2.Config, storage Storage) {
 	mux.Handle(loginURL, LoginHandler(googleOAuthConfig))
-	mux.Handle(callbackURL, CallbackHandler(googleOAuthConfig))
+	mux.Handle(callbackURL, CallbackHandler(googleOAuthConfig, storage))
 }
 
 // LoginHandler handles the login endpoint.
@@ -34,27 +39,40 @@ func LoginHandler(googleOAuthConfig *oauth2.Config) http.Handler {
 }
 
 // CallbackHandler handles the callback from Google.
-func CallbackHandler(googleOAuthConfig *oauth2.Config) http.Handler {
+func CallbackHandler(googleOAuthConfig *oauth2.Config, storage Storage) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
-			callback(w, r, googleOAuthConfig)
+			callback(w, r, googleOAuthConfig, storage)
 		default:
 			sendErr(r.Context(), w, errors.New("method not allowed"), http.StatusMethodNotAllowed)
 		}
 	})
 }
 
+// TODO(JOJO): randomize this
+var randState = "random"
+
 func login(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.Config) {
 	ctx := r.Context()
 	log := slog.FromCtx(ctx)
 
-	url := googleOAuthConfig.AuthCodeURL("", oauth2.AccessTypeOffline)
+	url := googleOAuthConfig.AuthCodeURL(randState, oauth2.AccessTypeOffline)
 	http.Redirect(w, r, url, http.StatusFound)
 	log.Info("login request received")
 }
 
-func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.Config) {
+func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.Config, storage Storage) {
+	state := r.FormValue("state")
+	if state == "" {
+		sendErr(r.Context(), w, errors.New("missing state"), http.StatusBadRequest)
+		return
+	}
+	if state != randState {
+		sendErr(r.Context(), w, errors.New("invalid state"), http.StatusBadRequest)
+		return
+	}
+
 	code := r.FormValue("code")
 	if code == "" {
 		sendErr(r.Context(), w, errors.New("missing code"), http.StatusBadRequest)
@@ -68,7 +86,6 @@ func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.
 		sendErr(ctx, w, err, http.StatusInternalServerError)
 		return
 	}
-
 	client := googleOAuthConfig.Client(ctx, token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
@@ -91,6 +108,14 @@ func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.
 	}
 
 	slog.Info("user info", "user_data", usr)
+
+	err = storage.SaveUser(usr)
+	if err != nil {
+		slog.Error("error saving user", "error", err.Error())
+		sendErr(ctx, w, err, http.StatusInternalServerError)
+		return
+	}
+
 	_, _ = w.Write([]byte("Success!"))
 }
 

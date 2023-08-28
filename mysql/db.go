@@ -43,6 +43,11 @@ func OpenDB(cfg Config) (*sql.DB, error) {
 		return nil, fmt.Errorf("error connecting to db: %v", err)
 	}
 
+	err = Migrate(db)
+	if err != nil {
+		return nil, fmt.Errorf("error running migrations: %v", err)
+	}
+
 	return db, nil
 }
 

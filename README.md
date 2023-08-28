@@ -22,3 +22,5 @@ export LEGITIMA_GOOGLE_CLIENT_SECRET=
 ## Command Line
 
 All commands could be accessed using: `Make help`
+
+## Tests

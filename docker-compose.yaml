@@ -9,7 +9,7 @@ services:
         GO_VERSION: ${GO_VERSION}
         GOLANGCI_LINT_VERSION: ${GOLANGCI_LINT_VERSION}
     environment:
-      LEGITIMA_MYSQL_URL: mysql://mysql:mysql@mysql:5432/legitima?useSSL=false
+      LEGITIMA_MYSQL_URL: "mysql:mysql@tcp(localhost:3307)/mysql"
     volumes:
       - .:/app/src
     depends_on:
@@ -18,15 +18,20 @@ services:
     command: go run ./cmd/legitima
   mysql:
     image: mysql:8.1.0
+    ports:
+      - 3307:3306
+    expose:
+      - 3307
     environment:
-      MYSQL_ROOT_PASSWORD: mysql
-      MYSQL_USER: mysql
-      MYSQL_DATABASE: mysql
+      MYSQL_ROOT_PASSWORD: "mysql"
+      MYSQL_USER: "mysql"
+      MYSQL_DATABASE: "mysql"
+      MYSQL_PASSWORD: "mysql"
     volumes:
       - db:/var/lib/mysql
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "mysql"]
       interval: 2s
       timeout: 3s
       retries: 40

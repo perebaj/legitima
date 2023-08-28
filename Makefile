@@ -130,6 +130,11 @@ dev/stop:
 	@echo "Stopping development server..."
 	@docker-compose down
 
+.PHONY: integration-test
+integration-test:
+	@echo "Running integration tests..."
+	go test -tags integration ./...
+	
 ## Display help for all targets
 .PHONY: help
 help:
