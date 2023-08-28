@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/birdie-ai/legitima/api"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )

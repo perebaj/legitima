@@ -1,8 +1,6 @@
-// Description: This file contains the token generation and validation logic
 package api
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -11,11 +9,13 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+// Token is the token decoded from the Authorization header.
 type Token struct {
 	Email string `json:"email"`
 }
 
-// TODO: find a way to improve this
+// JWTSecretKey TODO: improve this
+// JWTSecretKey is the secret key used to sign the JWT.
 const JWTSecretKey = "secret"
 
 func generateToken(email string) (string, error) {
@@ -26,7 +26,8 @@ func generateToken(email string) (string, error) {
 	return token.SignedString([]byte(JWTSecretKey))
 }
 
-func tokenFromHeader(ctx context.Context, r *http.Request) (*Token, error) {
+// TokenFromHeader parses the token from the Authorization header and validates it.
+func TokenFromHeader(r *http.Request) (*Token, error) {
 	tokenHeader := r.Header.Get("Authorization")
 	if tokenHeader == "" {
 		slog.Debug("no authorization header")

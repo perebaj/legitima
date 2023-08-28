@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/birdie-ai/golibs/slog"
-	"github.com/birdie-ai/legitima/mysql"
 	"golang.org/x/oauth2"
 )
 
@@ -20,7 +19,6 @@ const (
 // Storage interface take care of functionalities needed by the auth endpoints.
 type Storage interface {
 	SaveUser(gUsr GoogleUser) error
-	UserByEmail(*Token) (mysql.User, error)
 }
 
 // SetupAuth sets up the authentication endpoints.
@@ -142,28 +140,28 @@ type GoogleUser struct {
 	Locale        string `json:"locale"`
 }
 
-func profile(w http.ResponseWriter, r *http.Request, storage Storage) {
-	ctx := r.Context()
-	token, err := tokenFromHeader(ctx, r)
-	if err != nil {
-		slog.Warn("user not authenticated", "error", err.Error())
-		sendErr(ctx, w, err, http.StatusUnauthorized)
-		return
-	}
+// func profile(w http.ResponseWriter, r *http.Request) {
+// 	ctx := r.Context()
+// 	token, err := tokenFromHeader(ctx, r)
+// 	if err != nil {
+// 		slog.Warn("user not authenticated", "error", err.Error())
+// 		sendErr(ctx, w, err, http.StatusUnauthorized)
+// 		return
+// 	}
+// 	slog.Info("user authenticated", "token", token)
+// 	// usr, err := storage.UserByEmail(token)
+// 	// if err != nil {
+// 	// 	slog.Error("error getting user", "error", err.Error())
+// 	// 	sendErr(ctx, w, err, http.StatusInternalServerError)
+// 	// 	return
+// 	// }
 
-	usr, err := storage.UserByEmail(token)
-	if err != nil {
-		slog.Error("error getting user", "error", err.Error())
-		sendErr(ctx, w, err, http.StatusInternalServerError)
-		return
-	}
+// 	// usrByte, err := json.Marshal(usr)
+// 	// if err != nil {
+// 	// 	slog.Error("error marshaling user", "error", err.Error())
+// 	// 	sendErr(ctx, w, err, http.StatusInternalServerError)
+// 	// 	return
+// 	// }
 
-	usrByte, err := json.Marshal(usr)
-	if err != nil {
-		slog.Error("error marshaling user", "error", err.Error())
-		sendErr(ctx, w, err, http.StatusInternalServerError)
-		return
-	}
-
-	sendJSON(ctx, w, http.StatusOK, usrByte)
-}
+// 	sendJSON(ctx, w, http.StatusOK, token)
+// }

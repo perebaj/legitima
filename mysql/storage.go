@@ -32,3 +32,15 @@ func (s *Storage) SaveUser(gUsr api.GoogleUser) error {
 
 	return nil
 }
+
+// UserByEmail returns a user from the database filtered by email.
+func (s *Storage) UserByEmail(token *api.Token) (User, error) {
+	var usr User
+
+	err := s.db.QueryRow(`SELECT id, name, email FROM users WHERE email = ?`, token.Email).Scan(&usr.ID, &usr.Name, &usr.Email)
+	if err != nil {
+		return usr, fmt.Errorf("get user: %w", err)
+	}
+
+	return usr, nil
+}
