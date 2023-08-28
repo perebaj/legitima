@@ -35,3 +35,13 @@ func sendErr(ctx context.Context, res http.ResponseWriter, err error, statusCode
 		log.Error("failed to send json error message to client", "error", err)
 	}
 }
+
+func sendJSON(ctx context.Context, w http.ResponseWriter, statusCode int, body interface{}) {
+	const jsonContentType = "application/json; charset=utf-8"
+
+	w.Header().Set("Content-Type", jsonContentType)
+	w.WriteHeader(statusCode)
+	if err := json.NewEncoder(w).Encode(body); err != nil {
+		slog.FromCtx(ctx).Error("Unable to encode body as JSON", "error", err)
+	}
+}
