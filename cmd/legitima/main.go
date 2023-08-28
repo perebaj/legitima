@@ -55,19 +55,21 @@ func main() {
 	}
 
 	dbConfig := mysql.Config{
-		URL:             os.Getenv("LEGITIMA_MYSQL_URL"),
+		URL:             "root:mysql@tcp(localhost:3307)/mysql",
 		MaxOpenConns:    10,
 		MaxIdleConns:    5,
 		ConnMaxIdleTime: 5 * time.Minute,
 	}
 
-	_, err = mysql.OpenDB(dbConfig)
+	db, err := mysql.OpenDB(dbConfig)
 	if err != nil {
 		slog.Fatal("failed to open db", "error", err.Error())
 	}
 
+	storage := mysql.NewStorage(db)
+
 	mux := http.NewServeMux()
-	api.SetupAuth(mux, &googleOAuthConfig)
+	api.SetupAuth(mux, &googleOAuthConfig, storage)
 	// FIXME(JOJO): Remove this logic from the main package.
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFiles("templates/index.html")

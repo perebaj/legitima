@@ -9,7 +9,12 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+type mockStorage interface {
+	SaveUser(gUsr api.GoogleUser) error
+}
+
 func TestAuth_Callback_EmptyCode(t *testing.T) {
+	mStorage := new(mockStorage)
 	googleOAuthConfig := oauth2.Config{
 		ClientID:     "client-id",
 		ClientSecret: "client-secret",
@@ -19,7 +24,7 @@ func TestAuth_Callback_EmptyCode(t *testing.T) {
 			"https://www.googleapis.com/auth/userinfo.profile"},
 	}
 
-	h := api.CallbackHandler(&googleOAuthConfig)
+	h := api.CallbackHandler(&googleOAuthConfig, *mStorage)
 	req := httptest.NewRequest("GET", "/callback", nil)
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, req)
