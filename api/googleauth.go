@@ -62,7 +62,7 @@ func login(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.Con
 	ctx := r.Context()
 	log := slog.FromCtx(ctx)
 
-	url := googleOAuthConfig.AuthCodeURL(randState, oauth2.AccessTypeOffline)
+	url := googleOAuthConfig.AuthCodeURL(randState, oauth2.AccessTypeOnline)
 	http.Redirect(w, r, url, http.StatusFound)
 	log.Info("login request received")
 }

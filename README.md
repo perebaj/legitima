@@ -8,7 +8,6 @@
 
 Simple API to authenticate Services
 
-
 ## Google Auth
 
 The required environment variables to use the Google Auth are:
@@ -29,3 +28,12 @@ To reproduce the tests and lint, just run respectively: `make test` and `make li
 ## Tests
 
 For a while the **integration tests** are just able to run locally, so we need to start the development environment, using the command: `make dev/start`, then we can run the integration tests using the command: `make integration-test`
+
+## Ship a new version
+
+- `make image/publish`
+- `heroku container:release web -a legitima`
+
+## Heroku Logs
+
+- `heroku logs --tail -a legitima`
