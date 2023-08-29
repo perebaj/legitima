@@ -18,7 +18,7 @@ type Token struct {
 // JWTSecretKey is the secret key used to sign the JWT.
 const JWTSecretKey = "secret"
 
-// GenerateToken TODO(JOJO) improve this 
+// GenerateToken TODO: (jojo) improve this
 // GenerateToken generates a JWT token for the given email.
 func GenerateToken(email string) (string, error) {
 	claims := jwt.MapClaims{

@@ -142,7 +142,7 @@ func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.
 var indexTemplateFS embed.FS
 
 // HomeHandler handles the home page.
-func Home(w http.ResponseWriter, r *http.Request) {
+func HomeHandler(w http.ResponseWriter, _ *http.Request) {
 
 	tmpl, err := template.ParseFS(indexTemplateFS, "templates/index.html")
 	if err != nil {

@@ -69,7 +69,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	api.SetupAuth(mux, &googleOAuthConfig, storage)
-	mux.HandleFunc("/", api.Home)
+	mux.HandleFunc("/", api.HomeHandler)
 	api.SetupProfile(mux, storage)
 
 	svr := &http.Server{
