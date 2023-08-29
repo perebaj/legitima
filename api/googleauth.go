@@ -2,8 +2,10 @@
 package api
 
 import (
+	"embed"
 	"encoding/json"
 	"errors"
+	"html/template"
 	"net/http"
 
 	"github.com/birdie-ai/golibs/slog"
@@ -136,28 +138,22 @@ func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.
 	http.Redirect(w, r, profileURL, http.StatusSeeOther)
 }
 
-// func profile(w http.ResponseWriter, r *http.Request) {
-// 	ctx := r.Context()
-// 	token, err := tokenFromHeader(ctx, r)
-// 	if err != nil {
-// 		slog.Warn("user not authenticated", "error", err.Error())
-// 		sendErr(ctx, w, err, http.StatusUnauthorized)
-// 		return
-// 	}
-// 	slog.Info("user authenticated", "token", token)
-// 	// usr, err := storage.UserByEmail(token)
-// 	// if err != nil {
-// 	// 	slog.Error("error getting user", "error", err.Error())
-// 	// 	sendErr(ctx, w, err, http.StatusInternalServerError)
-// 	// 	return
-// 	// }
+//go:embed templates/index.html
+var indexTemplateFS embed.FS
 
-// 	// usrByte, err := json.Marshal(usr)
-// 	// if err != nil {
-// 	// 	slog.Error("error marshaling user", "error", err.Error())
-// 	// 	sendErr(ctx, w, err, http.StatusInternalServerError)
-// 	// 	return
-// 	// }
+// HomeHandler handles the home page.
+func HomeHandler(w http.ResponseWriter, _ *http.Request) {
 
-// 	sendJSON(ctx, w, http.StatusOK, token)
-// }
+	tmpl, err := template.ParseFS(indexTemplateFS, "templates/index.html")
+	if err != nil {
+		slog.Error("failed to parse template", "error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		slog.Error("failed to execute template", "error", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
