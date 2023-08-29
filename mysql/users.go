@@ -20,6 +20,7 @@ func newUser(gUsr legitima.GoogleUser) (u *User) {
 	}
 }
 
+// Convert  a database user to a legitima user.
 func (uDB *User) Convert() legitima.User {
 	return legitima.User{
 		ID:    uDB.ID,
@@ -27,5 +28,3 @@ func (uDB *User) Convert() legitima.User {
 		Email: uDB.Email,
 	}
 }
-
-// To reproduce the tests and lint, just run respectively: `make test` and `make lint`.
