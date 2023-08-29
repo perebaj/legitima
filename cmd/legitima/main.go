@@ -55,7 +55,7 @@ func main() {
 	}
 
 	dbConfig := mysql.Config{
-		URL:             "root:mysql@tcp(localhost:3307)/mysql",
+		URL:             os.Getenv("LEGITIMA_MYSQL_URL"),
 		MaxOpenConns:    10,
 		MaxIdleConns:    5,
 		ConnMaxIdleTime: 5 * time.Minute,
