@@ -18,9 +18,10 @@ type Token struct {
 // JWTSecretKey is the secret key used to sign the JWT.
 const JWTSecretKey = "secret"
 
-func generateToken(email string) (string, error) {
+// GenerateToken generates a JWT token for the given email.
+func GenerateToken(email string) (string, error) {
 	claims := jwt.MapClaims{
-		email: email,
+		"email": email,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(JWTSecretKey))

@@ -4,6 +4,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/birdie-ai/legitima"
 	"github.com/birdie-ai/legitima/api"
 
 	"golang.org/x/oauth2"
@@ -11,7 +12,8 @@ import (
 )
 
 type mockStorage interface {
-	SaveUser(gUsr api.GoogleUser) error
+	SaveUser(gUsr legitima.GoogleUser) error
+	UserByEmail(email string) (*legitima.User, error)
 }
 
 func TestAuth_Callback_EmptyCode(t *testing.T) {

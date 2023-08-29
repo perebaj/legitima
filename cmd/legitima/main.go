@@ -85,6 +85,8 @@ func main() {
 			return
 		}
 	})
+	api.SetupProfile(mux, storage)
+
 	svr := &http.Server{
 		Addr:         cfg.HTTPAddr,
 		Handler:      mux,
