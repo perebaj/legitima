@@ -5,7 +5,6 @@
 package main
 
 import (
-	"html/template"
 	"net/http"
 	"os"
 	"time"
@@ -70,21 +69,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	api.SetupAuth(mux, &googleOAuthConfig, storage)
-	// FIXME(JOJO): Remove this logic from the main package.
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tmpl, err := template.ParseFiles("templates/index.html")
-		if err != nil {
-			slog.Error("failed to parse template", "error", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		err = tmpl.Execute(w, nil)
-		if err != nil {
-			slog.Error("failed to execute template", "error", err.Error())
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-	})
+	mux.HandleFunc("/", api.Home)
 	api.SetupProfile(mux, storage)
 
 	svr := &http.Server{

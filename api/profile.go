@@ -1,6 +1,7 @@
 package api
 
 import (
+	"embed"
 	"errors"
 	"html/template"
 	"net/http"
@@ -27,6 +28,9 @@ func ProfileHandler(storage Storage) http.Handler {
 	})
 }
 
+//go:embed templates/profile.html
+var profileTemplateFS embed.FS
+
 func profile(w http.ResponseWriter, r *http.Request, storage Storage) {
 	authCookie, err := r.Cookie("Authorization")
 	if err != nil {
@@ -49,8 +53,7 @@ func profile(w http.ResponseWriter, r *http.Request, storage Storage) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	tmpl, err := template.ParseFiles("templates/profile.html")
+	tmpl, err := template.ParseFS(profileTemplateFS, "templates/profile.html")
 	if err != nil {
 		slog.Error("failed to parse template", "error", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
