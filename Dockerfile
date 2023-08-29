@@ -1,5 +1,4 @@
 ARG GO_VERSION
-
 FROM docker.io/golang:${GO_VERSION}-alpine3.17 as builder
 RUN apk --no-cache add make bash
 WORKDIR /app  

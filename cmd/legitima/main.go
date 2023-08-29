@@ -20,7 +20,7 @@ import (
 type Config struct {
 	ClientID     string
 	ClientSecret string
-	HTTPAddr     string
+	PORT         string
 }
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
 	cfg := &Config{
 		ClientID:     os.Getenv("LEGITIMA_GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("LEGITIMA_GOOGLE_CLIENT_SECRET"),
-		HTTPAddr:     getEnvWithDefault("LEGITIMA_HTTP_ADDR", ":8080"),
+		PORT:         getEnvWithDefault("PORT", "8080"),
 	}
 
 	if cfg.ClientID == "" || cfg.ClientSecret == "" {
@@ -48,7 +48,7 @@ func main() {
 		ClientID:     cfg.ClientID,
 		ClientSecret: cfg.ClientSecret,
 		Endpoint:     google.Endpoint,
-		RedirectURL:  "http://localhost:8080/callback",
+		RedirectURL:  "https://legitima-431f346ecb86.herokuapp.com/callback",
 		Scopes: []string{"https://www.googleapis.com/auth/userinfo.email",
 			"https://www.googleapis.com/auth/userinfo.profile"},
 	}
@@ -73,7 +73,7 @@ func main() {
 	api.SetupProfile(mux, storage)
 
 	svr := &http.Server{
-		Addr:         cfg.HTTPAddr,
+		Addr:         ":" + cfg.PORT,
 		Handler:      mux,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
