@@ -23,4 +23,8 @@ export LEGITIMA_GOOGLE_CLIENT_SECRET=
 
 All commands could be accessed using: `Make help`
 
+To reproduce the tests and lint, just run respectively: `make test` and `make lint`.
+
 ## Tests
+
+For a while the **integration tests** are just able to run locally, so we need to start the development environment, using the command: `make dev/start`, then we can run the integration tests using the command: `make integration-test`

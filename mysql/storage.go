@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/birdie-ai/legitima/api"
+	"github.com/birdie-ai/legitima"
 )
 
 // Storage holds the database connection.
@@ -19,11 +19,12 @@ func NewStorage(db *sql.DB) *Storage {
 }
 
 // SaveUser saves a user to the database.
-func (s *Storage) SaveUser(gUsr api.GoogleUser) error {
+func (s *Storage) SaveUser(gUsr legitima.GoogleUser) error {
 	usr := newUser(gUsr)
 
 	_, err := s.db.Exec(`INSERT INTO users (id, name, email) 
 		VALUES (?, ?, ?)
+		ON DUPLICATE KEY UPDATE name = IF(name != VALUES(name), VALUES(name), name)
 		`, usr.ID, usr.Name, usr.Email)
 
 	if err != nil {
@@ -34,13 +35,14 @@ func (s *Storage) SaveUser(gUsr api.GoogleUser) error {
 }
 
 // UserByEmail returns a user from the database filtered by email.
-func (s *Storage) UserByEmail(token *api.Token) (User, error) {
+func (s *Storage) UserByEmail(email string) (*legitima.User, error) {
+	// var usr legitima.User
 	var usr User
-
-	err := s.db.QueryRow(`SELECT id, name, email FROM users WHERE email = ?`, token.Email).Scan(&usr.ID, &usr.Name, &usr.Email)
+	err := s.db.QueryRow(`SELECT id, name, email FROM users WHERE email = ?`, email).Scan(&usr.ID, &usr.Name, &usr.Email)
 	if err != nil {
-		return usr, fmt.Errorf("get user: %w", err)
+		return nil, fmt.Errorf("user by email: %w", err)
 	}
 
-	return usr, nil
+	lUsr := usr.Convert()
+	return &lUsr, nil
 }

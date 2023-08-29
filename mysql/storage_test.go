@@ -10,7 +10,7 @@ import (
 	"time"
 
 	// mysql driver
-	"github.com/birdie-ai/legitima/api"
+	"github.com/birdie-ai/legitima"
 	"github.com/birdie-ai/legitima/mysql"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -68,7 +68,7 @@ func TestSaveUser(t *testing.T) {
 
 	storage := mysql.NewStorage(db)
 
-	gUsr := api.GoogleUser{
+	gUsr := legitima.GoogleUser{
 		Name:  "JojO",
 		ID:    "123",
 		Email: "jojo@example.com",
@@ -86,5 +86,110 @@ func TestSaveUser(t *testing.T) {
 	}
 	if count != 1 {
 		t.Fatalf("expected 1 row, got %d", count)
+	}
+}
+
+func TestSaveUserTwice(t *testing.T) {
+	db, dbName := Setup(t)
+	defer Teardown(t, db, dbName)
+
+	storage := mysql.NewStorage(db)
+
+	gUsr := legitima.GoogleUser{
+		Name:  "JojO",
+		ID:    "123",
+		Email: "jojo@gmail.com",
+	}
+
+	err := storage.SaveUser(gUsr)
+	if err != nil {
+		t.Fatalf("failed to save user: %v", err)
+	}
+
+	err = storage.SaveUser(gUsr)
+	if err != nil {
+		t.Fatalf("failed to save user: %v", err)
+	}
+
+	var count int
+	err = db.QueryRow("select COUNT(*) from users").Scan(&count)
+	if err != nil {
+		t.Fatalf("failed to select from users: %v", err)
+	}
+	if count != 1 {
+		t.Fatalf("expected 1 row, got %d", count)
+	}
+}
+
+func TestSaveUserUpdateName(t *testing.T) {
+	db, dbName := Setup(t)
+	defer Teardown(t, db, dbName)
+
+	storage := mysql.NewStorage(db)
+
+	gUsr := legitima.GoogleUser{
+		Name:  "JojO",
+		ID:    "123",
+		Email: "jojo@gmail.com",
+	}
+
+	gUsr2 := legitima.GoogleUser{
+		Name:  "JojO2",
+		ID:    "123",
+		Email: "jojo@gmail.com",
+	}
+
+	err := storage.SaveUser(gUsr)
+	if err != nil {
+		t.Fatalf("failed to save user: %v", err)
+	}
+
+	err = storage.SaveUser(gUsr2)
+	if err != nil {
+		t.Fatalf("failed to save user: %v", err)
+	}
+
+	var count int
+	err = db.QueryRow("select COUNT(*) from users").Scan(&count)
+	if err != nil {
+		t.Fatalf("failed to select from users: %v", err)
+	}
+
+	usr, err := storage.UserByEmail(gUsr.Email)
+	if err != nil {
+		t.Fatalf("failed to get user by email: %v", err)
+	}
+	if usr.Name != gUsr2.Name {
+		t.Fatalf("expected name %s, got %s", gUsr2.Name, usr.Name)
+	}
+}
+
+func TestUserByEmail(t *testing.T) {
+	db, dbName := Setup(t)
+	defer Teardown(t, db, dbName)
+
+	storage := mysql.NewStorage(db)
+
+	gUsr := legitima.GoogleUser{
+		Name:  "JojO",
+		ID:    "123",
+		Email: "jojo@gmail.com",
+	}
+
+	err := storage.SaveUser(gUsr)
+	if err != nil {
+		t.Fatalf("failed to save user: %v", err)
+	}
+
+	usr, err := storage.UserByEmail(gUsr.Email)
+	if err != nil {
+		t.Fatalf("failed to get user by email: %v", err)
+	}
+	if usr.Name != gUsr.Name {
+		t.Fatalf("expected name %s, got %s", gUsr.Name, usr.Name)
+	}
+
+	if usr.Email != gUsr.Email {
+		t.Fatalf("expected email %s, got %s", gUsr.Email, usr.Email)
 	}
 }

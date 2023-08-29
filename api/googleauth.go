@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/birdie-ai/golibs/slog"
+	"github.com/birdie-ai/legitima"
 	"golang.org/x/oauth2"
 )
 
@@ -18,7 +19,8 @@ const (
 
 // Storage interface take care of functionalities needed by the auth endpoints.
 type Storage interface {
-	SaveUser(gUsr GoogleUser) error
+	SaveUser(gUsr legitima.GoogleUser) error
+	UserByEmail(email string) (*legitima.User, error)
 }
 
 // SetupAuth sets up the authentication endpoints.
@@ -101,15 +103,13 @@ func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.
 
 	d := json.NewDecoder(resp.Body)
 
-	var usr GoogleUser
+	var usr legitima.GoogleUser
 	err = d.Decode(&usr)
 	if err != nil {
 		slog.Error("error decoding user info", "error", err.Error())
 		sendErr(ctx, w, err, http.StatusInternalServerError)
 		return
 	}
-
-	slog.Info("user info", "user_data", usr)
 
 	err = storage.SaveUser(usr)
 	if err != nil {
@@ -118,26 +118,22 @@ func callback(w http.ResponseWriter, r *http.Request, googleOAuthConfig *oauth2.
 		return
 	}
 
-	tokenString, err := generateToken(usr.Email)
+	tokenString, err := GenerateToken(usr.Email)
 	if err != nil {
 		slog.Error("error generating token", "error", err.Error())
 		sendErr(ctx, w, err, http.StatusInternalServerError)
 		return
 	}
-	slog.Info("token generated", "token", tokenString)
-	_, _ = w.Write([]byte(tokenString))
-}
 
-// GoogleUser represents the user data returned by Google.
-type GoogleUser struct {
-	ID            string `json:"id"`
-	Email         string `json:"email"`
-	Name          string `json:"name"`
-	VerifiedEmail bool   `json:"verified_email"`
-	GivenName     string `json:"given_name"`
-	FamilyName    string `json:"family_name"`
-	Picture       string `json:"picture"`
-	Locale        string `json:"locale"`
+	cookie := http.Cookie{
+		Name:     "Authorization",
+		Value:    "Bearer " + tokenString,
+		HttpOnly: true,
+		Path:     profileURL,
+		Secure:   true,
+	}
+	http.SetCookie(w, &cookie)
+	http.Redirect(w, r, profileURL, http.StatusSeeOther)
 }
 
 // func profile(w http.ResponseWriter, r *http.Request) {

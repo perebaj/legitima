@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/birdie-ai/legitima/api"
+	"github.com/birdie-ai/legitima"
 	"github.com/google/uuid"
 )
 
@@ -12,10 +12,19 @@ type User struct {
 	Email string `db:"email"`
 }
 
-func newUser(gUsr api.GoogleUser) (u *User) {
+func newUser(gUsr legitima.GoogleUser) (u *User) {
 	return &User{
 		ID:    uuid.New().String(),
 		Name:  gUsr.Name,
 		Email: gUsr.Email,
+	}
+}
+
+// Convert  a database user to a legitima user.
+func (uDB *User) Convert() legitima.User {
+	return legitima.User{
+		ID:    uDB.ID,
+		Name:  uDB.Name,
+		Email: uDB.Email,
 	}
 }
