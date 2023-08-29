@@ -25,6 +25,10 @@ type Config struct {
 
 // OpenDB opens a connection to the database.
 func OpenDB(cfg Config) (*sql.DB, error) {
+	if cfg.URL == "" {
+		return nil, fmt.Errorf("missing mysql url")
+	}
+
 	db, err := sql.Open("mysql", cfg.URL)
 	if err != nil {
 		return nil, fmt.Errorf("error opening db: %v", err)

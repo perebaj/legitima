@@ -16,6 +16,7 @@ The required environment variables to use the Google Auth are:
 ```
 export LEGITIMA_GOOGLE_CLIENT_ID=
 export LEGITIMA_GOOGLE_CLIENT_SECRET=
+export LEGITIMA_MYSQL_URL="root:mysql@tcp(localhost:3307)/mysql" <- Example for local tests (for a while)
 ```
 
 

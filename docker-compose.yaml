@@ -9,7 +9,7 @@ services:
         GO_VERSION: ${GO_VERSION}
         GOLANGCI_LINT_VERSION: ${GOLANGCI_LINT_VERSION}
     environment:
-      LEGITIMA_MYSQL_URL: "mysql:mysql@tcp(localhost:3307)/mysql"
+      LEGITIMA_MYSQL_URL: "root:mysql@tcp(localhost:3307)/mysql"
     volumes:
       - .:/app/src
     depends_on:
